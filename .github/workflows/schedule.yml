@@ -2,7 +2,7 @@ name: Nowly Data Factory
 
 on:
   schedule:
-    - cron: '*/5 * * * *'  # 15분마다 실행
+    - cron: '*/7 * * * *'  # 15분마다 실행
   workflow_dispatch:        # 수동 실행 버튼 생성
 
 jobs:
