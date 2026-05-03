@@ -26,5 +26,5 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
-          GEMINI_API_KEY_1: ${{ secrets.GEMINI_API_KEY_1 }} # 🚨 1번 열쇠!
+          GEMINI_API_KEY_1: ${{ secrets.GEMINI_API_KEY }} # 🚨 1번 열쇠!
         run: python nowly_master_A.py
