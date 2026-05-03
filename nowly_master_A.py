@@ -9,7 +9,7 @@ from supabase import create_client, Client
 # 1. 환경변수 로드 (A봇은 1번 열쇠를 씁니다!)
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
-GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY_1") # 🚨 수정 완료
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY_1") # 🚨 1번 열쇠 수정 완료!
 
 # 2. 클라이언트 세팅
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
@@ -17,7 +17,7 @@ genai.configure(api_key=GEMINI_API_KEY)
 
 model = genai.GenerativeModel('gemini-flash-latest')
 
-# ─── 데이터 크롤링 영역 (기존과 동일) ───
+# ─── 데이터 크롤링 영역 ───
 def get_google_trends():
     url = "https://trends.google.com/trending/rss?geo=KR"
     headers = {"User-Agent": "Mozilla/5.0"}
@@ -108,38 +108,37 @@ def get_news_headlines(keyword):
     except:
         return "뉴스 검색 실패"
 
+# 🚨 완전히 새로워진 제미나이 단일 요약 (안전성 1000%)
 def get_batch_ai_summaries(keywords):
     if not keywords:
         return {}
-    keyword_context = ""
+    
+    summary_dict = {}
+    
     for k in keywords:
         headlines = get_news_headlines(k)
-        keyword_context += f"키워드: {k} (최신뉴스: {headlines})\n"
+        prompt = f"""
+        현재 한국 실시간 검색어 '{k}'에 대한 요약을 작성해주세요.
+        최신 뉴스 헤드라인: {headlines}
 
-    prompt = f"""
-    다음은 현재 한국의 실시간 검색어와, 방금 긁어온 최신 뉴스 헤드라인들입니다.
-    {keyword_context}
-
-    [분석 지침 - 반드시 지킬 것]
-    1. 우선 제공된 '최신뉴스'를 바탕으로 이슈의 원인을 파악하십시오.
-    2. 만약 뉴스가 없거나("관련 뉴스 없음"), 뉴스로 설명되지 않는 커뮤니티 밈, 유튜브, 인터넷 방송 관련 바이럴 이슈라면, 당신이 가진 최신 지식을 총동원하여 '진짜 유행하는 이유'를 명확히 추론하십시오.
-    3. 각 키워드당 오직 '딱 한 문장'으로만 요약하십시오.
-    4. 별표, 샵, 대괄호 등 특수문자는 절대 사용하지 말고 존댓말로 작성하십시오.
-    """
-    summary_dict = {}
-    try:
-        response = model.generate_content(prompt)
-        lines = response.text.strip().replace('*', '').replace('#', '').split('\n')
-        for line in lines:
-            if ':' in line:
-                parts = line.split(':', 1)
-                k_word = parts[0].strip()
-                s_text = parts[1].strip()
-                summary_dict[k_word] = s_text
-        return summary_dict
-    except Exception as e:
-        print(f"\n[!] 일괄 요약 에러: {e}\n", flush=True)
-        return {}
+        [분석 지침]
+        1. 뉴스 헤드라인을 바탕으로 이 키워드가 왜 이슈인지 딱 1문장으로 명확히 요약하세요.
+        2. 뉴스가 없다면 당신의 최신 지식을 바탕으로 추론하세요.
+        3. 별표(*), 샵(#), 대괄호 등 특수문자는 절대 사용하지 말고 존댓말로 작성하세요.
+        """
+        
+        try:
+            # AI가 당황하지 않게 2초씩 숨 고르기 (API 한도 초과 완벽 방어)
+            time.sleep(2) 
+            response = model.generate_content(prompt)
+            # 제미나이가 준 답변에서 특수문자랑 줄바꿈을 싹 지우고 한 줄로 만듦
+            clean_text = response.text.strip().replace('*', '').replace('#', '').replace('\n', ' ')
+            summary_dict[k] = clean_text
+            print(f"▶ [{k}] AI 응답 완벽 수신!", flush=True)
+        except Exception as e:
+            print(f"\n[!] [{k}] 요약 에러: {e}\n", flush=True)
+            
+    return summary_dict
 
 # ─── 메인 프로세스 ───
 def process_trends():
@@ -152,9 +151,10 @@ def process_trends():
         print("수집된 트렌드 데이터가 없습니다.", flush=True)
         return
 
-    # 🚨 A봇만 기존 랭킹을 99위로 싹 초기화하는 역할을 맡습니다.
+    # 🚨 A봇 반장 전용 코드: 기존 랭킹을 99위로 싹 초기화하여 청소합니다!
     try:
         supabase.table("google_trends").update({"rank": 99}).neq("rank", 99).execute()
+        print("🧹 [A봇] 기존 랭킹 99위로 초기화 완료!", flush=True)
     except Exception as e:
         pass
 
