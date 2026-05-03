@@ -2,7 +2,7 @@ name: B봇 (6~10위 담당)
 
 on:
   schedule:
-    - cron: '*/30 * * * *' # 🚨 A봇과 반드시 똑같은 시간으로 맞춰주세요!
+    - cron: '*/5 * * * *' # 🚨 A봇과 반드시 똑같은 시간으로 맞춰주세요!
   workflow_dispatch:
 
 jobs:
