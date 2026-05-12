@@ -28,3 +28,5 @@ jobs:
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
           GEMINI_API_KEY_2: ${{ secrets.GEMINI_API_KEY_2 }} # 🚨 2번 열쇠!
         run: python nowly_master_B.py
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
